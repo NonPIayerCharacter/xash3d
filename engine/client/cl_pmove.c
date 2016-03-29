@@ -563,6 +563,13 @@ static const char *pfnTraceTexture( int ground, float *vstart, float *vend )
 
 static void pfnPlaySound( int channel, const char *sample, float volume, float attenuation, int fFlags, int pitch )
 {
+	if( !clgame.pmove->runfuncs )
+	{
+		MsgDev( D_NOTE, "^5 %f Blocked!\n", clgame.pmove->time );
+		return;
+	}
+	MsgDev( D_NOTE, "^3 %f Passed!\n", clgame.pmove->time );
+
 	sound_t	snd = S_RegisterSound( sample );
 
 	S_StartSound( NULL, clgame.pmove->player_index + 1, channel, snd, volume, attenuation, pitch, fFlags );
@@ -650,6 +657,8 @@ void CL_InitClientMove( void )
 	clgame.pmove->server = false;	// running at client
 	clgame.pmove->movevars = &clgame.movevars;
 	clgame.pmove->runfuncs = false;
+
+	Q_memset( cl.runfuncs, 0, sizeof( cl.runfuncs ) );
 
 	Mod_SetupHulls( clgame.player_mins, clgame.player_maxs );
 
@@ -904,30 +913,18 @@ void CL_PredictMovement( void )
 	AngleVectors( cl.refdef.cl_viewangles, cl.refdef.forward, cl.refdef.right, cl.refdef.up );
 
 	ASSERT( cl.refdef.cmd != NULL );
-	if( !cl_predict->value )
-	{
-		//simulate predict
-		local_state_t t1, t2;
-		Q_memset( &t1, 0, sizeof( local_state_t ));
-		Q_memset( &t2, 0, sizeof( local_state_t ));
-		t1.client = cl.frame.local.client;
-		Q_memcpy( t1.weapondata, cl.frame.local.weapondata, sizeof( t1.weapondata ));
-		t1.playerstate = cl.frame.playerstate[cl.playernum];
-		clgame.dllFuncs.pfnPostRunCmd( &t1, &t2, cl.refdef.cmd, true, cl.time, cls.lastoutgoingcommand );
-		cl.predicted_viewmodel = t2.client.viewmodel;
-		cl.scr_fov = t2.client.fov;
-		if( cl.scr_fov < 1.0f || cl.scr_fov> 170.0f )
-			cl.scr_fov = 90.0f;
-		return;
-	}
 
 	if( !CL_IsPredicted( ))
 	{
+		MsgDev( D_ERROR, "Shiiiiit!\n");
 		local_state_t t1, t2;
-		Q_memset( &t1, 0, sizeof( local_state_t ));
-		Q_memset( &t2, 0, sizeof( local_state_t ));
-		clgame.dllFuncs.pfnPostRunCmd( &t1, &t2, cl.refdef.cmd, false, cl.time, cls.lastoutgoingcommand );
 
+		t1 = t2 = cl.frame.local;
+		t1.playerstate = t2.playerstate = cl.frame.playerstate[cl.playernum];
+
+		clgame.dllFuncs.pfnPostRunCmd( &t1, &t2, cl.refdef.cmd, true, cl.time, cls.lastoutgoingcommand );
+
+		cl.predicted_viewmodel = t2.client.viewmodel;
 		cl.scr_fov = t2.client.fov;
 		if( cl.scr_fov < 1.0f || cl.scr_fov> 170.0f )
 			cl.scr_fov = 90.0f;
@@ -944,7 +941,7 @@ void CL_PredictMovement( void )
 
 	time = cl.frame.time;
 
-		CL_SetSolidEntities ();
+	CL_SetSolidEntities ();
 	CL_SetSolidPlayers ( cl.playernum );
 
 	while( 1 )

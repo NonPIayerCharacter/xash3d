@@ -293,6 +293,7 @@ void CL_CreateCmd( void )
 
 	// build list of all solid entities per next frame (exclude clients)
 	CL_SetSolidEntities ();
+	pfnPushPMStates();
 	CL_SetSolidPlayers ( cl.playernum );
 	VectorCopy( cl.refdef.cl_viewangles, angles );
 	VectorCopy( cl.frame.local.client.origin, cl.data.origin );
@@ -329,6 +330,8 @@ void CL_CreateCmd( void )
 	active = ( cls.state == ca_active && !cl.refdef.paused && !cls.demoplayback );
 	clgame.dllFuncs.CL_CreateMove( cl.time - cl.oldtime, &cmd, active );
 
+	pfnPopPMStates();
+
 	// after command generated in client,
 	// add motion events from engine controls
 	IN_EngineAppendMove( host.frametime, &cmd, active);
@@ -361,7 +364,9 @@ void CL_CreateCmd( void )
 		cl.refdef.cmd = &cl.cmds[frame];
 		*cl.refdef.cmd = cmd;
 
+#if 1
 		cl.runfuncs[frame] = TRUE;
+#endif
 	}
 }
 
@@ -508,7 +513,10 @@ void CL_WritePacket( void )
 		for( i = numcmds - 1; i >= 0; i-- )
 		{
 			cmdnumber = ( cls.netchan.outgoing_sequence - i ) & CL_UPDATE_MASK;
-
+#if 0
+			if( i == 0 ) cl.runfuncs[cmdnumber] = true;
+			else cl.runfuncs[cmdnumber] = false;
+#endif
 			to = cmdnumber;
 			CL_WriteUsercmd( &buf, from, to );
 			from = to;

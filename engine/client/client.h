@@ -326,7 +326,9 @@ typedef struct
 	playermove_t	*pmove;			// pmove state
 
 	int		old_trace_hull;		// used by PM_Push\Pop state
-	int		oldcount;			// used by PM_Push\Pop state
+	int		oldphyscount;			// used by PM_Push\Pop state
+	int		oldviscount;
+	qboolean pushed;
 
 	vec3_t		player_mins[MAX_MAP_HULLS];	// 4 hulls allowed
 	vec3_t		player_maxs[MAX_MAP_HULLS];	// 4 hulls allowed

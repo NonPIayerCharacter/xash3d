@@ -1097,7 +1097,11 @@ void CL_InitEdicts( void )
 	cls.num_client_entities = CL_UPDATE_BACKUP * 64;
 	cls.packet_entities = Z_Realloc( cls.packet_entities, sizeof( entity_state_t ) * cls.num_client_entities );
 	clgame.entities = Mem_Alloc( clgame.mempool, sizeof( cl_entity_t ) * clgame.maxEntities );
+	Q_memset( clgame.entities, 0, sizeof( cl_entity_t ) * clgame.maxEntities );
+
 	clgame.static_entities = Mem_Alloc( clgame.mempool, sizeof( cl_entity_t ) * MAX_STATIC_ENTITIES );
+	Q_memset( clgame.static_entities, 0, sizeof( cl_entity_t ) * MAX_STATIC_ENTITIES );
+
 	clgame.numStatics = 0;
 
 	if(( clgame.maxRemapInfos - 1 ) != clgame.maxEntities )
@@ -2343,7 +2347,16 @@ pfnPushPMStates
 */
 void pfnPushPMStates( void )
 {
-	clgame.oldcount = clgame.pmove->numphysent;
+	if( clgame.pushed )
+	{
+		MsgDev( D_WARN, "CL_PushPMStates called with pushed stack\n");
+	}
+	else
+	{
+		clgame.oldphyscount = clgame.pmove->numphysent;
+		clgame.oldviscount = clgame.pmove->numvisent;
+		clgame.pushed = true;
+	}
 }
 
 /*
@@ -2354,7 +2367,16 @@ pfnPopPMStates
 */
 void pfnPopPMStates( void )
 {
-	clgame.pmove->numphysent = clgame.oldcount;
+	if( clgame.pushed )
+	{
+		clgame.pmove->numphysent = clgame.oldphyscount;
+		clgame.pmove->numvisent = clgame.oldviscount;
+		clgame.pushed = false;
+	}
+	else
+	{
+		MsgDev( D_WARN, "CL_PopPMStates called without stack\n" );
+	}
 }
 
 /*
