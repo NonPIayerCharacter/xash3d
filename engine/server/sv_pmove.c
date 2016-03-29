@@ -808,9 +808,6 @@ static void SV_FinishPMove( playermove_t *pmove, sv_client_t *cl )
 	}
 
 	SV_SetMinMaxSize( clent, pmove->player_mins[pmove->usehull], pmove->player_maxs[pmove->usehull] );
-
-	// all next calls ignore footstep sounds
-	pmove->runfuncs = false;
 }
 
 entity_state_t *SV_FindEntInPack( int index, client_frame_t *frame )
