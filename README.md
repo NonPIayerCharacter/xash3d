@@ -1,4 +1,4 @@
-# Xash3D SDL Engine [![Build Status](https://travis-ci.org/NonPIayerCharacter/xash3d.svg?branch=gles2-3366)](https://travis-ci.org/SDLash3D/xash3d) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/SDLash3D/xash3d?branch=master&svg=true)](https://ci.appveyor.com/project/a1batross/xash3d)
+# Xash3D SDL Engine [![Build Status](https://travis-ci.org/NonPIayerCharacter/xash3d.svg)](https://travis-ci.org/NonPIayerCharacter/xash3d) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/SDLash3D/xash3d?branch=master&svg=true)](https://ci.appveyor.com/project/a1batross/xash3d)
 Latest version of the library is available at:
 https://github.com/SDLash3D/xash3d
 
