@@ -1763,21 +1763,23 @@ void MSG_WriteDeltaEntity( entity_state_t *from, entity_state_t *to, sizebuf_t *
 	}
 	else BF_WriteOneBit( msg, 0 ); 
 
-	if( to->entityType == ENTITY_NORMAL )
-	{
-		if( player )
+		if (to->entityType == ENTITY_BEAM)
 		{
-			dt = Delta_FindStruct( "entity_state_player_t" );
+			dt = Delta_FindStruct("custom_entity_state_t");
 		}
-		else
+		else //  ENTITY_NORMAL or other (predict state)
 		{
-			dt = Delta_FindStruct( "entity_state_t" );
+			if (to->entityType != ENTITY_NORMAL)
+				MsgDev(D_ERROR, "MSG_ReadDeltaEntity: broken delta\n");
+			if (player)
+			{
+				dt = Delta_FindStruct("entity_state_player_t");
+			}
+			else
+			{
+				dt = Delta_FindStruct("entity_state_t");
+			}
 		}
-	}
-	else if( to->entityType == ENTITY_BEAM )
-	{
-		dt = Delta_FindStruct( "custom_entity_state_t" );
-	}
 
 	ASSERT( dt && dt->bInitialized );
 		
@@ -1876,7 +1878,7 @@ qboolean MSG_ReadDeltaEntity( sizebuf_t *msg, entity_state_t *from, entity_state
 	if( !(dt && dt->bInitialized) ) // Broken  delta?
 	{
 		MsgDev( D_ERROR, "MSG_ReadDeltaEntity: broken delta\n");
-		return true;
+		return false;
 	}
 	pField = dt->pFields;
 	ASSERT( pField );
